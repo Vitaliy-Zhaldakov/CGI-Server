@@ -135,15 +135,18 @@ import xml.etree.ElementTree as Etree
 # Создание структуры файла
 file = open('X:\\PyCharm Community Edition 2021.2.2\\CGI-Server\\venv\\Data.xml', 'w')
 
-# Определение корня и потомка (таблица)
+# Определение корня
 data = Etree.Element('data')
+
+# Определение таблицы Фотоаппараты как потомка корня
 table = Etree.SubElement(data, 'table')
+table.set('name', 'Cameras')
 
 # Извлечение данных из таблицы Фотоаппараты
 cursor.execute("SELECT * FROM cameras")
 cameras = cursor.fetchall()
 
-# Создание структуры записей как потомков таблицы
+# Создание структуры записей как потомков таблицы Фотоаппараты
 for row in cameras:
     entry = Etree.SubElement(table, 'entry')
 
@@ -160,6 +163,31 @@ for row in cameras:
     type.text = str(row[3])
     price.text = str(row[4])
 
+# Определение таблицы Видеокамеры как потомка корня
+table = Etree.SubElement(data, 'table')
+table.set('name', 'VideoCameras')
+
+# Извлечение данных из таблицы Видеокамеры
+cursor.execute("SELECT * FROM videoCameras")
+videoCameras = cursor.fetchall()
+
+# Создание структуры записей как потомков таблицы Видеокамеры
+for row in videoCameras:
+    entry = Etree.SubElement(table, 'entry')
+
+    # Поля записи
+    id = Etree.SubElement(entry, 'field')
+    manufacturer = Etree.SubElement(entry, 'field')
+    model = Etree.SubElement(entry, 'field')
+    resolution = Etree.SubElement(entry, 'field')
+    price = Etree.SubElement(entry, 'field')
+
+    id.text = str(row[0])
+    manufacturer.text = str(row[1])
+    model.text = str(row[2])
+    resolution.text = str(row[3])
+    price.text = str(row[4])
+
 # Импорт в файл
 tableData = str(Etree.tostring(data))
 file.write(tableData)
@@ -171,13 +199,29 @@ tree = Etree.parse('X:\\PyCharm Community Edition 2021.2.2\\CGI-Server\\venv\\Da
 root = tree.getroot()
 
 for table in root:
-    for entry in table:
-        manufacturer = entry[0].text
-        model = entry[1].text
-        type = entry[2].text
-        price = entry[3].text
-        cursor.execute("INSERT INTO cameras(manufacturer, model, typeID, price) VALUES(?, ?, ?, ?)",
-                       (manufacturer, model, type, price))
+    if table.get('name') == 'Cameras':
+        for entry in table:
+            manufacturer = entry[0].text
+            model = entry[1].text
+            type = entry[2].text
+            price = entry[3].text
+            cursor.execute("INSERT INTO cameras(manufacturer, model, typeID, price) VALUES(?, ?, ?, ?)",
+                           (manufacturer, model, type, price))
+
+    elif table.get('name') == 'VideoCameras':
+        for entry in table:
+            manufacturer = entry[0].text
+            model = entry[1].text
+            resolution = entry[2].text
+            price = entry[3].text
+            cursor.execute("INSERT INTO videoCameras(manufacturer, model, resolutionID, price) VALUES(?, ?, ?, ?)",
+                           (manufacturer, model, resolution, price))
+
+cursor.execute("SELECT * FROM cameras")
+print(cursor.fetchall())
+
+cursor.execute("SELECT * FROM videoCameras")
+print(cursor.fetchall())
 
 # Закрытие соединения
 connection.close()
