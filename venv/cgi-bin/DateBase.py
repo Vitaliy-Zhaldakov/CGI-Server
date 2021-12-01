@@ -129,14 +129,55 @@ actionCameras = [('Aceline', 'S-60', '7', '2699'),
 # cursor.execute("DELETE FROM cameras WHERE cameraID = 9")
 #cursor.execute("UPDATE SQLITE_SEQUENCE SET SEQ = 7 WHERE NAME = 'cameras';")
 #connection.commit()
-manufact = 'Hi'
-mode = 'huy'
-typ = '10'
-pric = '100'
 
-#cursor.execute("INSERT INTO cameras(manufacturer, model, typeID, price) VALUES(?, ?, ?, ?)", (manufact, mode, typ, pric))
+import xml.etree.ElementTree as Etree
+
+# Создание структуры файла
+file = open('X:\\PyCharm Community Edition 2021.2.2\\CGI-Server\\venv\\Data.xml', 'w')
+
+# Определение корня и потомка (таблица)
+data = Etree.Element('data')
+table = Etree.SubElement(data, 'table')
+
+# Извлечение данных из таблицы Фотоаппараты
 cursor.execute("SELECT * FROM cameras")
-print(cursor.fetchall())
+cameras = cursor.fetchall()
+
+# Создание структуры записей как потомков таблицы
+for row in cameras:
+    entry = Etree.SubElement(table, 'entry')
+
+    # Поля записи
+    id = Etree.SubElement(entry, 'field')
+    manufacturer = Etree.SubElement(entry, 'field')
+    model = Etree.SubElement(entry, 'field')
+    type = Etree.SubElement(entry, 'field')
+    price = Etree.SubElement(entry, 'field')
+
+    id.text = str(row[0])
+    manufacturer.text = str(row[1])
+    model.text = str(row[2])
+    type.text = str(row[3])
+    price.text = str(row[4])
+
+# Импорт в файл
+tableData = str(Etree.tostring(data))
+file.write(tableData)
+file.close()
+
+
+# Экспорт из файла
+tree = Etree.parse('X:\\PyCharm Community Edition 2021.2.2\\CGI-Server\\venv\\Data.xml')
+root = tree.getroot()
+
+for table in root:
+    for entry in table:
+        manufacturer = entry[0].text
+        model = entry[1].text
+        type = entry[2].text
+        price = entry[3].text
+        cursor.execute("INSERT INTO cameras(manufacturer, model, typeID, price) VALUES(?, ?, ?, ?)",
+                       (manufacturer, model, type, price))
 
 # Закрытие соединения
 connection.close()
