@@ -188,13 +188,12 @@ for row in videoCameras:
     resolution.text = str(row[3])
     price.text = str(row[4])
 
-# Импорт в файл
-tableData = str(Etree.tostring(data))
-file.write(tableData)
+# Экспорт в файл
+tableData = Etree.tostring(data)
+file.write(xml.etree.ElementTree.canonicalize(tableData))
 file.close()
 
-
-# Экспорт из файла
+# Импорт из файла
 tree = Etree.parse('X:\\PyCharm Community Edition 2021.2.2\\CGI-Server\\venv\\Data.xml')
 root = tree.getroot()
 
